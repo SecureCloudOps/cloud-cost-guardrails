@@ -94,10 +94,26 @@ variable "budget_alert_email" {
   }
 }
 
-variable "detect_existing_github_actions_iam" {
-  description = "When true, look up existing GitHub Actions IAM role/policy instead of always creating; useful for bootstrap in accounts that already have these resources."
-  type        = bool
-  default     = false
+variable "existing_github_actions_role_name" {
+  description = "Name of a pre-existing IAM role for GitHub Actions Terraform. Leave empty to create it."
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = length(trimspace(var.existing_github_actions_role_name)) == 0 || length(trimspace(var.existing_github_actions_role_name)) > 0
+    error_message = "existing_github_actions_role_name must be empty or a non-empty string."
+  }
+}
+
+variable "existing_github_actions_policy_arn" {
+  description = "ARN of a pre-existing IAM policy for GitHub Actions Terraform. Leave empty to create it."
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = length(trimspace(var.existing_github_actions_policy_arn)) == 0 || length(trimspace(var.existing_github_actions_policy_arn)) > 0
+    error_message = "existing_github_actions_policy_arn must be empty or a non-empty string."
+  }
 }
 
 variable "github_owner" {

@@ -4,6 +4,7 @@
 # account/region hardcoding.
 locals {
   github_actions_policy_name = "${var.project}-${var.env}-gha-terraform"
+  github_actions_policy_arn_input = trimspace(var.existing_github_actions_policy_arn)
   sns_topic_name = "${var.project}-budget-alerts"
   sns_topic_arns = [
     "arn:aws:sns:*:*:${local.sns_topic_name}",
@@ -11,15 +12,9 @@ locals {
   ]
 }
 
-data "aws_iam_policies" "github_actions" {
-  count       = var.detect_existing_github_actions_iam ? 1 : 0
-  scope       = "Local"
-  name_regex  = "^${local.github_actions_policy_name}$"
-  path_prefix = "/"
-}
-
-locals {
-  github_actions_policy_exists = var.detect_existing_github_actions_iam && length(try(data.aws_iam_policies.github_actions[0].arns, [])) > 0
+data "aws_iam_policy" "existing" {
+  count = length(local.github_actions_policy_arn_input) > 0 ? 1 : 0
+  arn   = local.github_actions_policy_arn_input
 }
 
 data "aws_iam_policy_document" "github_actions_permissions" {
@@ -78,7 +73,7 @@ data "aws_iam_policy_document" "github_actions_permissions" {
 }
 
 resource "aws_iam_policy" "github_actions" {
-  count       = local.github_actions_policy_exists ? 0 : 1
+  count       = length(local.github_actions_policy_arn_input) > 0 ? 0 : 1
   name        = local.github_actions_policy_name
   description = "Least-privilege policy for GitHub Actions Terraform (budgets, SNS alerts, future state backend)."
   policy      = data.aws_iam_policy_document.github_actions_permissions.json
@@ -86,10 +81,10 @@ resource "aws_iam_policy" "github_actions" {
 }
 
 locals {
-  github_actions_policy_arn = local.github_actions_policy_exists ? data.aws_iam_policies.github_actions[0].arns[0] : aws_iam_policy.github_actions[0].arn
+  github_actions_policy_arn = length(local.github_actions_policy_arn_input) > 0 ? data.aws_iam_policy.existing[0].arn : aws_iam_policy.github_actions[0].arn
 }
 
 resource "aws_iam_role_policy_attachment" "github_actions" {
-  role       = local.github_actions_role_name_final
+  role       = local.github_actions_role_name_resolved
   policy_arn = local.github_actions_policy_arn
 }

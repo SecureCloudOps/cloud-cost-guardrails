@@ -27,6 +27,14 @@ on:
         description: "TTL tag value"
         default: "30d"
         required: true
+      existing_github_actions_role_name:
+        description: "Existing IAM role name for GitHub Actions Terraform (leave blank to create)"
+        default: "cloud-cost-guardrails-dev-gha-terraform"
+        required: true
+      existing_github_actions_policy_arn:
+        description: "Existing IAM policy ARN for GitHub Actions Terraform (leave blank to create)"
+        default: "arn:aws:iam::767828729088:policy/cloud-cost-guardrails-dev-gha-terraform"
+        required: true
 
 permissions:
   contents: read
@@ -69,7 +77,8 @@ jobs:
           TF_VAR_owner: ${{ inputs.owner }}
           TF_VAR_cost_center: ${{ inputs.cost_center }}
           TF_VAR_ttl: ${{ inputs.ttl }}
-          TF_VAR_detect_existing_github_actions_iam: "true"
+          TF_VAR_existing_github_actions_role_name: ${{ inputs.existing_github_actions_role_name }}
+          TF_VAR_existing_github_actions_policy_arn: ${{ inputs.existing_github_actions_policy_arn }}
           TF_VAR_github_owner: ${{ github.repository_owner }}
           TF_VAR_github_repo: ${{ github.event.repository.name }}
           TF_VAR_github_branch: "main"
