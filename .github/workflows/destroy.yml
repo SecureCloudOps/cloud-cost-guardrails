@@ -1,0 +1,47 @@
+name: Destroy (placeholder)
+
+on:
+  workflow_dispatch:
+    # Manual only; destructive by design. Do not wire to automated triggers.
+    # Add required inputs (environment, confirmation string) when enabling.
+
+permissions:
+  contents: read
+  id-token: write # Needed for future AWS OIDC; no long-lived credentials stored.
+
+jobs:
+  terraform-destroy:
+    name: Terraform destroy (manual placeholder)
+    runs-on: ubuntu-latest
+    if: false # Prevent execution until explicitly enabled and approved.
+    environment: production # Replace/require appropriate protected environment when enabling.
+    defaults:
+      run:
+        working-directory: terraform
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Configure AWS credentials via OIDC using the role ARN output from Terraform.
+      # Set repo/org variable GHA_TERRAFORM_ROLE_ARN from terraform output github_actions_role_arn.
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.GHA_TERRAFORM_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+        if: false # keep disabled until destroy workflow is approved and role ARN is wired
+
+      # Backend init would be required to target the correct state before destroy.
+      # - name: Terraform init (with backend)
+      #   run: terraform init -input=false -upgrade
+
+      # Destroy is intentionally manual, never automatic.
+      # - name: Terraform destroy
+      #   run: terraform destroy -auto-approve -lock=true -input=false
+
+    # Guardrails:
+    # - Intended solely for cleanup and cost control.
+    # - Must never run automatically; require workflow_dispatch + protected environment/approvals.
+    # - Do not enable until backend and roles are defined and reviewed.
