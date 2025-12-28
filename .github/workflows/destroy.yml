@@ -1,0 +1,80 @@
+name: Destroy (placeholder)
+
+on:
+  workflow_dispatch:
+    # Manual only; destructive by design. Do not wire to automated triggers.
+    inputs:
+      aws_region:
+        description: "AWS region for destroy"
+        default: "us-east-1"
+        required: true
+      project:
+        description: "Project tag value"
+        default: "cloud-cost-guardrails"
+        required: true
+      env:
+        description: "Environment tag value"
+        default: "prod"
+        required: true
+      owner:
+        description: "Owner tag value"
+        default: "platform@example.com"
+        required: true
+      cost_center:
+        description: "CostCenter tag value"
+        default: "cc-prod"
+        required: true
+      ttl:
+        description: "TTL tag value"
+        default: "90d"
+        required: true
+      budget_amount:
+        description: "Monthly budget amount for alerts (demo-safe)"
+        default: "50"
+        required: true
+      budget_alert_email:
+        description: "Email address for budget alerts (placeholder only)"
+        default: "placeholder@example.com"
+        required: true
+
+permissions:
+  contents: read
+  id-token: write # Needed for future AWS OIDC; no long-lived credentials stored.
+
+jobs:
+  terraform-destroy:
+    name: Terraform destroy (manual placeholder)
+    runs-on: ubuntu-latest
+    if: false # Prevent execution until explicitly enabled and approved.
+    environment: production # Replace/require appropriate protected environment when enabling.
+    defaults:
+      run:
+        working-directory: terraform
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Configure AWS credentials via OIDC using the role ARN output from Terraform.
+      # Set repo/org variable AWS_ROLE_ARN from terraform output github_actions_role_arn.
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          role-session-name: gha-${{ github.run_id }}
+          aws-region: ${{ vars.AWS_REGION }}
+        if: false # keep disabled until destroy workflow is approved and role ARN is wired
+
+      # Backend init would be required to target the correct state before destroy.
+      # - name: Terraform init (with backend)
+      #   run: terraform init -input=false -upgrade
+
+      # Destroy is intentionally manual, never automatic.
+      # - name: Terraform destroy
+      #   run: terraform destroy -auto-approve -lock=true -input=false
+
+    # Guardrails:
+    # - Intended solely for cleanup and cost control.
+    # - Must never run automatically; require workflow_dispatch + protected environment/approvals.
+    # - Do not enable until backend and roles are defined and reviewed.
