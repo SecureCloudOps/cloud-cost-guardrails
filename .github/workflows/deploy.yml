@@ -1,0 +1,78 @@
+name: Deploy (placeholder)
+
+on:
+  workflow_dispatch:
+    # Manual only; apply is intentionally not automated.
+    inputs:
+      aws_region:
+        description: "AWS region for deployment"
+        default: "us-east-1"
+        required: true
+      project:
+        description: "Project tag value"
+        default: "cloud-cost-guardrails"
+        required: true
+      env:
+        description: "Environment tag value"
+        default: "prod"
+        required: true
+      owner:
+        description: "Owner tag value"
+        default: "platform@example.com"
+        required: true
+      cost_center:
+        description: "CostCenter tag value"
+        default: "cc-prod"
+        required: true
+      ttl:
+        description: "TTL tag value"
+        default: "90d"
+        required: true
+      budget_amount:
+        description: "Monthly budget amount for alerts (demo-safe)"
+        default: "50"
+        required: true
+      budget_alert_email:
+        description: "Email address for budget alerts (placeholder only)"
+        default: "placeholder@example.com"
+        required: true
+
+permissions:
+  contents: read
+  id-token: write # Required for future OIDC to AWS; no credentials stored in repo.
+
+jobs:
+  terraform-apply:
+    name: Terraform apply (manual placeholder)
+    runs-on: ubuntu-latest
+    if: false # Prevent execution until explicitly enabled.
+    defaults:
+      run:
+        working-directory: terraform
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Configure AWS credentials via OIDC using the role ARN output from Terraform.
+      # Set repo/org variable GHA_TERRAFORM_ROLE_ARN from terraform output github_actions_role_arn.
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.GHA_TERRAFORM_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+        if: false # keep disabled until deployment is approved and role ARN is wired
+
+      # Terraform backend init would be configured once remote state is defined.
+      # - name: Terraform init (with backend)
+      #   run: terraform init -input=false -upgrade
+
+      # Apply would run only after explicit approval.
+      # - name: Terraform apply
+      #   run: terraform apply -auto-approve -lock=true -input=false
+
+    # Notes:
+    # - Apply is manual to keep production changes auditable and approval-gated.
+    # - CI validation remains separate to avoid using backend/state during PR checks.
+    # - Backend is omitted in PR validation to prevent accidental state writes from forks.
