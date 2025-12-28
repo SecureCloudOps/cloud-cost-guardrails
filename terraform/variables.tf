@@ -3,7 +3,7 @@ variable "aws_region" {
   type        = string
 
   validation {
-    condition     = length(trim(var.aws_region)) > 0
+    condition     = length(trimspace(var.aws_region)) > 0
     error_message = "aws_region must be a non-empty string."
   }
 }
@@ -13,7 +13,7 @@ variable "project" {
   type        = string
 
   validation {
-    condition     = length(trim(var.project)) > 0
+    condition     = length(trimspace(var.project)) > 0
     error_message = "project must be a non-empty string."
   }
 }
@@ -23,7 +23,7 @@ variable "owner" {
   type        = string
 
   validation {
-    condition     = length(trim(var.owner)) > 0
+    condition     = length(trimspace(var.owner)) > 0
     error_message = "owner must be a non-empty string."
   }
 }
@@ -43,7 +43,7 @@ variable "cost_center" {
   type        = string
 
   validation {
-    condition     = length(trim(var.cost_center)) > 0
+    condition     = length(trimspace(var.cost_center)) > 0
     error_message = "cost_center must be a non-empty string."
   }
 }
@@ -53,7 +53,7 @@ variable "ttl" {
   type        = string
 
   validation {
-    condition     = length(trim(var.ttl)) > 0
+    condition     = length(trimspace(var.ttl)) > 0
     error_message = "ttl must be a non-empty string."
   }
 }
@@ -66,7 +66,7 @@ variable "extra_tags" {
   validation {
     condition = alltrue([
       for k, v in var.extra_tags :
-      length(trim(k)) > 0 && length(trim(v)) > 0
+      length(trimspace(k)) > 0 && length(trimspace(v)) > 0
     ])
     error_message = "extra_tags keys and values must be non-empty strings."
   }
@@ -89,7 +89,7 @@ variable "budget_alert_email" {
   default     = "placeholder@example.com"
 
   validation {
-    condition     = length(trim(var.budget_alert_email)) > 0 && can(regex("@", var.budget_alert_email))
+    condition     = length(trimspace(var.budget_alert_email)) > 0 && can(regex("@", var.budget_alert_email))
     error_message = "budget_alert_email must be a non-empty email address."
   }
 }
@@ -99,7 +99,7 @@ variable "github_owner" {
   type        = string
 
   validation {
-    condition     = length(trim(var.github_owner)) > 0
+    condition     = length(trimspace(var.github_owner)) > 0
     error_message = "github_owner must be a non-empty string."
   }
 }
@@ -109,7 +109,7 @@ variable "github_repo" {
   type        = string
 
   validation {
-    condition     = length(trim(var.github_repo)) > 0
+    condition     = length(trimspace(var.github_repo)) > 0
     error_message = "github_repo must be a non-empty string."
   }
 }
@@ -120,7 +120,7 @@ variable "github_branch" {
   default     = "main"
 
   validation {
-    condition     = length(trim(var.github_branch)) > 0
+    condition     = length(trimspace(var.github_branch)) > 0
     error_message = "github_branch must be a non-empty string."
   }
 }
@@ -133,7 +133,7 @@ variable "github_workflows" {
   validation {
     condition = alltrue([
       for wf in var.github_workflows :
-      length(trim(wf)) > 0
+      length(trimspace(wf)) > 0
     ])
     error_message = "github_workflows entries must be non-empty."
   }

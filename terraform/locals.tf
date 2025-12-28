@@ -20,6 +20,6 @@ locals {
 
   missing_or_empty_mandatory_tags = [
     for key in local.mandatory_tag_keys : key
-    if !contains(local.mandatory_tags, key) || length(trim(local.mandatory_tags[key])) == 0
+    if !contains(local.mandatory_tags, key) || length(trimspace(local.mandatory_tags[key])) == 0
   ]
 }
