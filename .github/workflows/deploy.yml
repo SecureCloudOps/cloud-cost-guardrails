@@ -56,11 +56,12 @@ jobs:
           fetch-depth: 0
 
       # Configure AWS credentials via OIDC using the role ARN output from Terraform.
-      # Set repo/org variable GHA_TERRAFORM_ROLE_ARN from terraform output github_actions_role_arn.
+      # Set repo/org variable AWS_ROLE_ARN from terraform output github_actions_role_arn.
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ vars.GHA_TERRAFORM_ROLE_ARN }}
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          role-session-name: gha-${{ github.run_id }}
           aws-region: ${{ vars.AWS_REGION }}
         if: false # keep disabled until deployment is approved and role ARN is wired
 

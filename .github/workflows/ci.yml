@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   terraform-checks:
@@ -27,6 +28,14 @@ jobs:
         with:
           terraform_version: 1.6.6
 
+      - name: Configure AWS credentials (OIDC)
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          role-session-name: gha-${{ github.run_id }}
+          aws-region: ${{ vars.AWS_REGION }}
+
       - name: Terraform fmt
         run: terraform fmt -check -recursive
 
@@ -37,6 +46,7 @@ jobs:
         run: terraform validate -no-color
 
       - name: Terraform plan (no refresh, no backend, no prompts)
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         run: terraform plan -lock=false -input=false -refresh=false -no-color
 
   checkov:

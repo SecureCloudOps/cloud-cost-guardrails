@@ -23,6 +23,7 @@ Security-first AWS cost guardrails built with Terraform, CI scanning, and server
 ## Bootstrap (one-time)
 - Use `.github/workflows/bootstrap.yml` once with temporary AWS keys to create the OIDC provider and IAM role.
 - After bootstrap, delete the AWS keys and rely solely on the OIDC-enabled deploy/destroy workflows.
+- Set repository variables `AWS_ROLE_ARN` (from the Terraform output `github_actions_role_arn`) and `AWS_REGION` so CI/deploy/destroy can assume the role via OIDC with no long-lived credentials.
 
 ## AWS Budget Alerts
 - Creates a low-limit monthly cost budget with alerts at 80% (forecasted) and 100% (actual) of spend.
