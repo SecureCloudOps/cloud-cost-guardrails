@@ -30,29 +30,21 @@ resource "aws_budgets_budget" "monthly_cost_guardrail" {
   limit_unit        = "USD"
   time_unit         = "MONTHLY"
 
+  notification {
+    comparison_operator        = "GREATER_THAN"
+    notification_type          = "FORECASTED"
+    threshold                  = 80
+    threshold_type             = "PERCENTAGE"
+    subscriber_sns_topic_arns  = [aws_sns_topic.budget_alerts.arn]
+  }
+
+  notification {
+    comparison_operator        = "GREATER_THAN"
+    notification_type          = "ACTUAL"
+    threshold                  = 100
+    threshold_type             = "PERCENTAGE"
+    subscriber_sns_topic_arns  = [aws_sns_topic.budget_alerts.arn]
+  }
+
   tags = local.mandatory_tags
-}
-
-# Budget notifications are defined separately to align with the AWS provider schema.
-# Tags are not supported on budget notifications.
-resource "aws_budgets_budget_notification" "forecasted_80" {
-  budget_name         = aws_budgets_budget.monthly_cost_guardrail.name
-  comparison_operator = "GREATER_THAN"
-  notification_type   = "FORECASTED"
-  threshold           = 80
-  threshold_type      = "PERCENTAGE"
-  subscriber_sns_topic_arns = [
-    aws_sns_topic.budget_alerts.arn
-  ]
-}
-
-resource "aws_budgets_budget_notification" "actual_100" {
-  budget_name         = aws_budgets_budget.monthly_cost_guardrail.name
-  comparison_operator = "GREATER_THAN"
-  notification_type   = "ACTUAL"
-  threshold           = 100
-  threshold_type      = "PERCENTAGE"
-  subscriber_sns_topic_arns = [
-    aws_sns_topic.budget_alerts.arn
-  ]
 }
