@@ -1,0 +1,89 @@
+name: Bootstrap OIDC IAM
+
+on:
+  workflow_dispatch:
+    inputs:
+      aws_region:
+        description: "AWS region for bootstrap"
+        default: "us-east-1"
+        required: true
+      project:
+        description: "Project tag value"
+        default: "cloud-cost-guardrails"
+        required: true
+      env:
+        description: "Environment tag value"
+        default: "dev"
+        required: true
+      owner:
+        description: "Owner tag value"
+        default: "platform@example.com"
+        required: true
+      cost_center:
+        description: "CostCenter tag value"
+        default: "cc-bootstrap"
+        required: true
+      ttl:
+        description: "TTL tag value"
+        default: "30d"
+        required: true
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  bootstrap-iam-oidc:
+    name: Create OIDC provider and IAM role (one-time)
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+
+      - name: Terraform init (no backend)
+        working-directory: terraform
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ inputs.aws_region }}
+        run: terraform init -backend=false -lock=false
+
+      # Targeted apply to create only the OIDC provider, IAM role, policy, and attachment.
+      - name: Terraform apply OIDC + IAM role (targeted)
+        working-directory: terraform
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ inputs.aws_region }}
+          TF_VAR_aws_region: ${{ inputs.aws_region }}
+          TF_VAR_project: ${{ inputs.project }}
+          TF_VAR_env: ${{ inputs.env }}
+          TF_VAR_owner: ${{ inputs.owner }}
+          TF_VAR_cost_center: ${{ inputs.cost_center }}
+          TF_VAR_ttl: ${{ inputs.ttl }}
+          TF_VAR_detect_existing_github_actions_iam: "true"
+          TF_VAR_github_owner: ${{ github.repository_owner }}
+          TF_VAR_github_repo: ${{ github.event.repository.name }}
+          TF_VAR_github_branch: "main"
+        run: |
+          terraform apply \
+            -lock=false -input=false -auto-approve \
+            -target=aws_iam_role.github_actions_terraform \
+            -target=aws_iam_policy.github_actions \
+            -target=aws_iam_role_policy_attachment.github_actions
+
+      - name: Post-bootstrap guidance
+        run: |
+          echo "::notice::Bootstrap complete. Next steps:"
+          echo "1) Delete AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY secrets from the repo."
+          echo "2) Set repo/org variable GHA_TERRAFORM_ROLE_ARN to the IAM role ARN output by Terraform."
+          echo "3) Enable deploy/destroy workflows with OIDC (no static keys)."
+          echo "4) Re-run CI to validate with backend still disabled."
