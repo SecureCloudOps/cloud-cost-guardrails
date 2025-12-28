@@ -69,13 +69,13 @@ jobs:
           TF_VAR_owner: ${{ inputs.owner }}
           TF_VAR_cost_center: ${{ inputs.cost_center }}
           TF_VAR_ttl: ${{ inputs.ttl }}
+          TF_VAR_detect_existing_github_actions_iam: "true"
           TF_VAR_github_owner: ${{ github.repository_owner }}
           TF_VAR_github_repo: ${{ github.event.repository.name }}
           TF_VAR_github_branch: "main"
         run: |
           terraform apply \
             -lock=false -input=false -auto-approve \
-            -target=aws_iam_openid_connect_provider.github \
             -target=aws_iam_role.github_actions_terraform \
             -target=aws_iam_policy.github_actions \
             -target=aws_iam_role_policy_attachment.github_actions

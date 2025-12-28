@@ -94,6 +94,12 @@ variable "budget_alert_email" {
   }
 }
 
+variable "detect_existing_github_actions_iam" {
+  description = "When true, look up existing GitHub Actions IAM role/policy instead of always creating; useful for bootstrap in accounts that already have these resources."
+  type        = bool
+  default     = false
+}
+
 variable "github_owner" {
   description = "GitHub organization or user that owns this repository."
   type        = string
