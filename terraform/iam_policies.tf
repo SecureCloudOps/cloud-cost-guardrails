@@ -1,7 +1,12 @@
+# Use the expected SNS topic name without depending on the topic resource so the
+# bootstrap IAM-only apply does not try to create SNS/Budget resources. The
+# wildcarded ARN is constrained to the topic name pattern while avoiding
+# account/region hardcoding.
 locals {
+  sns_topic_name = "${var.project}-budget-alerts"
   sns_topic_arns = [
-    aws_sns_topic.budget_alerts.arn,
-    "${aws_sns_topic.budget_alerts.arn}:*",
+    "arn:aws:sns:*:*:${local.sns_topic_name}",
+    "arn:aws:sns:*:*:${local.sns_topic_name}:*",
   ]
 }
 
