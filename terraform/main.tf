@@ -31,19 +31,19 @@ resource "aws_budgets_budget" "monthly_cost_guardrail" {
   time_unit         = "MONTHLY"
 
   notification {
-    comparison_operator        = "GREATER_THAN"
-    notification_type          = "FORECASTED"
-    threshold                  = 80
-    threshold_type             = "PERCENTAGE"
-    subscriber_sns_topic_arns  = [aws_sns_topic.budget_alerts.arn]
+    comparison_operator       = "GREATER_THAN"
+    notification_type         = "FORECASTED"
+    threshold                 = 80
+    threshold_type            = "PERCENTAGE"
+    subscriber_sns_topic_arns = [aws_sns_topic.budget_alerts.arn]
   }
 
   notification {
-    comparison_operator        = "GREATER_THAN"
-    notification_type          = "ACTUAL"
-    threshold                  = 100
-    threshold_type             = "PERCENTAGE"
-    subscriber_sns_topic_arns  = [aws_sns_topic.budget_alerts.arn]
+    comparison_operator       = "GREATER_THAN"
+    notification_type         = "ACTUAL"
+    threshold                 = 100
+    threshold_type            = "PERCENTAGE"
+    subscriber_sns_topic_arns = [aws_sns_topic.budget_alerts.arn]
   }
 
   tags = local.mandatory_tags

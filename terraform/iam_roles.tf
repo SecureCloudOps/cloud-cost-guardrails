@@ -1,7 +1,7 @@
 locals {
-  github_actions_role_name_input  = trimspace(var.existing_github_actions_role_name)
-  github_actions_role_name        = "${var.project}-${var.env}-gha-terraform"
-  github_actions_role_name_final  = length(local.github_actions_role_name_input) > 0 ? local.github_actions_role_name_input : local.github_actions_role_name
+  github_actions_role_name_input = trimspace(var.existing_github_actions_role_name)
+  github_actions_role_name       = "${var.project}-${var.env}-gha-terraform"
+  github_actions_role_name_final = length(local.github_actions_role_name_input) > 0 ? local.github_actions_role_name_input : local.github_actions_role_name
   github_subjects_allowed = [
     for workflow in var.github_workflows :
     "repo:${var.github_owner}/${var.github_repo}:ref:refs/heads/${var.github_branch}:workflow:${workflow}"
@@ -51,5 +51,5 @@ resource "aws_iam_role" "github_actions_terraform" {
 
 locals {
   github_actions_role_name_resolved = length(local.github_actions_role_name_input) > 0 ? data.aws_iam_role.existing[0].name : aws_iam_role.github_actions_terraform[0].name
-  github_actions_role_arn_resolved  = length(local.github_actions_role_name_input) > 0 ? data.aws_iam_role.existing[0].arn  : aws_iam_role.github_actions_terraform[0].arn
+  github_actions_role_arn_resolved  = length(local.github_actions_role_name_input) > 0 ? data.aws_iam_role.existing[0].arn : aws_iam_role.github_actions_terraform[0].arn
 }

@@ -3,9 +3,9 @@
 # wildcarded ARN is constrained to the topic name pattern while avoiding
 # account/region hardcoding.
 locals {
-  github_actions_policy_name = "${var.project}-${var.env}-gha-terraform"
+  github_actions_policy_name      = "${var.project}-${var.env}-gha-terraform"
   github_actions_policy_arn_input = trimspace(var.existing_github_actions_policy_arn)
-  sns_topic_name = "${var.project}-budget-alerts"
+  sns_topic_name                  = "${var.project}-budget-alerts"
   sns_topic_arns = [
     "arn:aws:sns:*:*:${local.sns_topic_name}",
     "arn:aws:sns:*:*:${local.sns_topic_name}:*",
