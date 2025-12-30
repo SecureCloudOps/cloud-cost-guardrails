@@ -1,4 +1,5 @@
 # Terraform
+.terraform/
 **/.terraform/*
 *.tfstate
 *.tfstate.*
@@ -8,11 +9,19 @@ crash.*.log
 *plan*.out
 plan.json
 terraform.tfvars
+.terraform.tfvars
+.auto.tfvars
+.auto.tfvars.json
+.terraform.lock.hcl.backup
+terraform.lock.hcl
+.terraform.lock.hcl
+.tfvars.json
+
+# Overrides
 .override.tf
 .override.tf.json
 *_override.tf
 *_override.tf.json
-.terraform.lock.hcl.backup
 
 # Secrets and env
 .env
@@ -23,11 +32,17 @@ terraform.tfvars
 *.pfx
 *.crt
 *.cer
+*.der
 
 # Logs
 *.log
+log/
 
 # OS and editor
 .DS_Store
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
+Thumbs.db
