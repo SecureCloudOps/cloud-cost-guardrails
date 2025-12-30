@@ -150,7 +150,7 @@ variable "github_branch" {
 variable "github_workflows" {
   description = "Workflows allowed to assume the Terraform role (filenames)."
   type        = list(string)
-  default     = ["deploy.yml", "destroy.yml"]
+  default     = ["deploy.yml", "destroy.yml", "ci.yml"]
 
   validation {
     condition = alltrue([

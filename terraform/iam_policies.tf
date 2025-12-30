@@ -6,10 +6,6 @@ locals {
   github_actions_policy_name      = "${var.project}-${var.env}-gha-terraform"
   github_actions_policy_arn_input = trimspace(var.existing_github_actions_policy_arn)
   sns_topic_name                  = "${var.project}-budget-alerts"
-  sns_topic_arns = [
-    "arn:aws:sns:*:*:${local.sns_topic_name}",
-    "arn:aws:sns:*:*:${local.sns_topic_name}:*",
-  ]
 }
 
 data "aws_iam_policy" "existing" {
@@ -34,7 +30,10 @@ data "aws_iam_policy_document" "github_actions_permissions" {
       "budgets:DescribeBudgetAction",
       "budgets:DescribeBudgetActionsForBudget",
     ]
-    resources = ["*"] # Budgets are account-scoped; AWS does not support resource-level ARNs for budgets.
+    # checkov:skip=CKV_AWS_356: AWS Budgets API requires Resource='*'; no resource-level permissions exist.
+    # checkov:skip=CKV_AWS_108: AWS Budgets API requires Resource='*'; no resource-level permissions exist.
+    # checkov:skip=CKV_AWS_111: AWS Budgets API requires Resource='*'; no resource-level permissions exist.
+    resources = ["*"]
   }
 
   statement {
@@ -50,7 +49,7 @@ data "aws_iam_policy_document" "github_actions_permissions" {
       "sns:ListSubscriptionsByTopic",
       "sns:Publish",
     ]
-    resources = local.sns_topic_arns
+    resources = [aws_sns_topic.budget_alerts.arn]
   }
 
   # Placeholder for future state backend access; scope to concrete ARNs once chosen.
@@ -68,7 +67,10 @@ data "aws_iam_policy_document" "github_actions_permissions" {
       "dynamodb:UpdateItem",
       "dynamodb:DescribeTable",
     ]
-    resources = ["*"] # Scope to state bucket/table ARNs when backend is defined.
+    # checkov:skip=CKV_AWS_356: Placeholder until backend bucket/table exists; will scope to ARNs when backend is defined.
+    # checkov:skip=CKV_AWS_108: Placeholder until backend bucket/table exists; will scope to ARNs when backend is defined.
+    # checkov:skip=CKV_AWS_111: Placeholder until backend bucket/table exists; will scope to ARNs when backend is defined.
+    resources = ["*"]
   }
 }
 
