@@ -24,11 +24,11 @@ resource "aws_sns_topic_subscription" "budget_email" {
 }
 
 resource "aws_budgets_budget" "monthly_cost_guardrail" {
-  name              = "${var.project}-${var.env}-monthly-budget"
-  budget_type       = "COST"
-  limit_amount      = var.budget_amount
-  limit_unit        = "USD"
-  time_unit         = "MONTHLY"
+  name         = "${var.project}-${var.env}-monthly-budget"
+  budget_type  = "COST"
+  limit_amount = var.budget_amount
+  limit_unit   = "USD"
+  time_unit    = "MONTHLY"
 
   notification {
     comparison_operator       = "GREATER_THAN"
