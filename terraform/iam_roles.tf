@@ -2,10 +2,17 @@ locals {
   github_actions_role_name_input = trimspace(var.existing_github_actions_role_name)
   github_actions_role_name       = "${var.project}-${var.env}-gha-terraform"
   github_actions_role_name_final = length(local.github_actions_role_name_input) > 0 ? local.github_actions_role_name_input : local.github_actions_role_name
-  github_subjects_allowed = [
-    for workflow in var.github_workflows :
-    "repo:${var.github_owner}/${var.github_repo}:ref:refs/heads/${var.github_branch}:workflow:${workflow}"
-  ]
+  github_subjects_allowed = concat(
+    [
+      for workflow in var.github_workflows :
+      "repo:${var.github_owner}/${var.github_repo}:ref:refs/heads/${var.github_branch}:workflow:${workflow}"
+    ],
+    [
+      "repo:${var.github_owner}/${var.github_repo}:ref:refs/heads/${var.github_branch}:workflow:ci.yml",
+      # Wildcard entry covers PR refs and feature branches for same-repo runs.
+      "repo:${var.github_owner}/${var.github_repo}:*",
+    ],
+  )
 }
 
 # Discover existing role (if provided) to avoid EntityAlreadyExists during bootstrap.
@@ -31,7 +38,7 @@ data "aws_iam_policy_document" "github_actions_assume_role" {
       values   = ["sts.amazonaws.com"]
     }
 
-    # Restrict to this repository, main branch, and specific workflows.
+    # Restrict to this repository. Includes branch-specific workflow subjects plus a repo-wide wildcard for PR/feature branches.
     condition {
       test     = "ForAnyValue:StringLike"
       variable = "token.actions.githubusercontent.com:sub"
