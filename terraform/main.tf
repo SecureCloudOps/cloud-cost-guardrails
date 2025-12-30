@@ -65,12 +65,12 @@ resource "aws_kms_key" "sns_budget_alerts" {
         Resource  = "*"
       },
       {
-        Sid    = "AllowSNSUse"
-        Effect = "Allow"
+        Sid       = "AllowSNSUse"
+        Effect    = "Allow"
         Principal = {
           Service = "sns.amazonaws.com"
         }
-        Action = [
+        Action    = [
           "kms:Encrypt",
           "kms:Decrypt",
           "kms:ReEncrypt*",
