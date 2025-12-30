@@ -38,7 +38,7 @@ data "aws_iam_policy_document" "github_actions_assume_role" {
       values   = ["sts.amazonaws.com"]
     }
 
-    # Restrict to this repository, main branch, and specific workflows.
+    # Restrict to this repository. Includes branch-specific workflow subjects plus a repo-wide wildcard for PR/feature branches.
     condition {
       test     = "ForAnyValue:StringLike"
       variable = "token.actions.githubusercontent.com:sub"
