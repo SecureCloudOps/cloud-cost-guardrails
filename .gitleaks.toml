@@ -1,0 +1,12 @@
+title = "cloud-cost-guardrails gitleaks config"
+description = "Extends defaults with scoped allowlists for harmless example placeholders."
+
+[allowlist]
+  description = "Allow only example placeholders in sample files"
+  regexes = [
+    '''(?i)(example|placeholder|changeme)'''
+  ]
+  paths = [
+    '''\.env\.example''',
+    '''terraform\.tfvars\.example'''
+  ]
