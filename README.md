@@ -1,4 +1,4 @@
-# cloud-cost-guardrails
+# Cloud Cost Guardrails
 
 Security-first AWS cost guardrails built with Terraform, CI scanning, and serverless-first components.
 
