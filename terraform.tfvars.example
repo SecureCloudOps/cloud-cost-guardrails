@@ -1,0 +1,8 @@
+aws_region   = "us-east-1"
+env          = "dev"
+project      = "cloud-cost-guardrails"
+owner        = "team@example.com"
+cost_center  = "cc-demo"
+ttl          = "30d"
+budget_amount      = 50
+budget_alert_email = "example-alerts@example.com"
