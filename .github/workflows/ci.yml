@@ -1,0 +1,118 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pull-requests: read
+  id-token: write
+
+jobs:
+  terraform-checks:
+    name: Terraform checks
+    runs-on: ubuntu-latest
+    env:
+      AWS_EC2_METADATA_DISABLED: "true"
+    defaults:
+      run:
+        working-directory: terraform
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+
+      - name: Terraform fmt
+        run: terraform fmt -check -recursive
+
+      - name: Terraform init (no backend for PR validation)
+        env:
+          TF_IN_AUTOMATION: "true"
+          TF_INPUT: "false"
+          TF_VAR_aws_region: ${{ vars.AWS_REGION }}
+          TF_VAR_project: ${{ vars.PROJECT }}
+          TF_VAR_env: ${{ vars.ENV }}
+          TF_VAR_owner: ${{ vars.OWNER }}
+          TF_VAR_cost_center: ${{ vars.COST_CENTER }}
+          TF_VAR_ttl: ${{ vars.TTL }}
+          TF_VAR_github_owner: ${{ github.repository_owner }}
+          TF_VAR_github_repo: ${{ github.event.repository.name }}
+          TF_VAR_github_branch: ${{ github.ref_name }}
+        run: terraform init -backend=false -lock=false
+
+      - name: Terraform validate
+        env:
+          TF_IN_AUTOMATION: "true"
+          TF_INPUT: "false"
+          TF_VAR_aws_region: ${{ vars.AWS_REGION }}
+          TF_VAR_project: ${{ vars.PROJECT }}
+          TF_VAR_env: ${{ vars.ENV }}
+          TF_VAR_owner: ${{ vars.OWNER }}
+          TF_VAR_cost_center: ${{ vars.COST_CENTER }}
+          TF_VAR_ttl: ${{ vars.TTL }}
+          TF_VAR_github_owner: ${{ github.repository_owner }}
+          TF_VAR_github_repo: ${{ github.event.repository.name }}
+          TF_VAR_github_branch: ${{ github.ref_name }}
+        run: terraform validate -no-color
+
+      - name: Terraform plan (no refresh, no backend, no prompts)
+        env:
+          TF_IN_AUTOMATION: "true"
+          TF_INPUT: "false"
+          TF_VAR_aws_region: ${{ vars.AWS_REGION }}
+          TF_VAR_project: ${{ vars.PROJECT }}
+          TF_VAR_env: ${{ vars.ENV }}
+          TF_VAR_owner: ${{ vars.OWNER }}
+          TF_VAR_cost_center: ${{ vars.COST_CENTER }}
+          TF_VAR_ttl: ${{ vars.TTL }}
+          TF_VAR_github_owner: ${{ github.repository_owner }}
+          TF_VAR_github_repo: ${{ github.event.repository.name }}
+          TF_VAR_github_branch: ${{ github.ref_name }}
+        # Plan requires OIDC and is gated to same-repo runs; forked PRs skip.
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        run: terraform plan -lock=false -input=false -refresh=false -no-color
+
+  checkov:
+    name: Checkov scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install Checkov
+        run: pip install --upgrade checkov
+
+      - name: Run Checkov
+        run: checkov -d terraform --quiet --compact
+
+  gitleaks:
+    name: Gitleaks scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Gitleaks
+        uses: zricethezav/gitleaks-action@v2
+        with:
+          config-path: .gitleaks.toml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
